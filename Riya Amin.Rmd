@@ -1,0 +1,425 @@
+---
+title: "World Happiness Report"
+subtitle: "Assignment 3 Intro to Stats"
+author: "Riya Minesh Amin s3807007"
+date: "Last updated: `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  slidy_presentation:
+    font_adjustment: 0
+    highlight: haddock
+    mathjax: "default"
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+# Use this chunk to quietly load your pacakges
+
+knitr::opts_chunk$set(
+	fig.align = "center",
+	message = FALSE,
+	warning = FALSE
+)
+# Packages loaded in this chunk will not appear in the presentation. 
+
+library(rmarkdown)
+library(GGally)
+library("knitr")
+library(car)
+library(rgl)
+library(data.table)
+library(plotly)
+library(wildcard)
+library(shiny)
+library(PerformanceAnalytics)
+library(DT)
+library(ggplot2)
+library(dplyr)
+library(gsheet)
+library(corrplot)
+library(magrittr)
+library(gridExtra)
+library("htmltools")
+library(reshape2)
+library(granova)
+library(psychometric)
+library(Hmisc)
+library(qwraps2)
+library(readr)
+library(tidyverse)
+library(plyr)
+library(readr)
+
+```
+
+
+# RPubs link information
+
+- Rpubs link : http://rpubs.com/Riya1702/MATH1324 
+
+
+
+# Introduction
+
+- Leading experts across disciplines of economics, national statistics, research analysis, psychology, education, public policy, and more explains how well-being metrics can be used efficiently to assess nations' development.
+- The studies examine the state of happiness in today's world to demonstrate how personal and national differences in happiness are understood by the new science of happiness.
+- The initial Inspiration behind collecting the data of countries or regions was to rank the highest in overall happiness and studying the lead factors behind the happiness by each country and ranking them in terms of the same. 
+- This report aim is to examine the relationship among the factors affecting the happiness of the countries
+ 
+# Problem Statement
+
+- Computing whether there are any different factors tht lead to happiness of the country.
+
+- How have the ranks or ratings of countries changed between 2015 and 2017? Has there been a substantial increase in   Happiness if there is an increase in the GDP(ECONOMY) or Health of any country?
+- Whether there is any relationship between certain regions and average happiness score of any country.
+
+And to come to a conclusion for the following problem statements, t statistics, correlation and various different plot have been performed to analyse the same.
+
+# Data
+
+* The Data was collected from kaggle.com. (https://kaggle.com/anilcanblt/world-happiness-analysis-a-simple-approach).
+
+* The Gallup World Poll data is used by the satisfaction ratings and rankings. The ratings are based on responses to the poll's main question of life assessment. This survey, known as the Cantril ladder, asks respondents to find a ladder with the best possible life for them to be a 10 and the worst possible life to be a 0 and to rank on that scale their own current lives.The scores are for the years 2013-2016 from nationally representative samples and use the weights of Gallup to make the estimates representative.The columns following the happiness rating measure the degree to which each of the six variables – economic output, social support, life expectancy, equality, lack of corruption, and generosity – contribute to higher life scores in each country than in Dystopia, a hypothetical country with values equal to the lowest national averages in the world for each of the six factors. For each country, they have no effect on the total score published, but they do clarify why some countries rank higher than others(Kaggle. 2019. World Happiness Analysis).
+
+# Data Cont.
+
+- The list of components in the datasets are:
+Country, Region, Happiness Rank, Happiness Score, Standard Error, Economy (GDP per capita), Health, Freedom, Trust(Government corruption), generosity, Dystiopis Residual).
+- To process the data, applicable pacakges are installed. 2017 data set has been filtered during the process to make all the 3 data set identitcal to compare. 
+
+## Data Import
+```{r}
+X2017 <- read_csv("D:/2017.csv")
+x2016 <- read_csv("D:/2016.csv")
+X2015 <- read_csv("D:/2015.csv")
+```
+
+## Data components
+
+```{r}
+head(X2015)
+head(x2016)
+head(X2017)
+```
+
+## Check whether the data has any null values
+
+```{r}
+summary(X2015)
+summary(x2016)
+summary(X2017)
+```
+
+# Descriptive Statistics and Visualisation
+
+#### Therefore here we see that it is one of the cleanest data which we are dealing!
+
+#### We will plot each year first  and then combine the data frames.
+
+#### Scattered plot graphs showing how hapiness is based on the Trust (corrupted government).
+
+```{r}
+scatterplot(X2015$`Happiness Rank`, X2015$`Trust (Government Corruption)`, xlab ="Happiness Rank", ylab = "Trust (Government Corruption)", main = "Happiness rank based on Trust")
+
+scatterplot(x2016$`Happiness Rank`, x2016$`Trust (Government Corruption)`, xlab ="Happiness Rank", ylab = "Trust (Government Corruption)", main = "Happiness rank based on Trust")
+
+scatterplot(X2017$Happiness.Rank, X2017$Trust..Government.Corruption., xlab ="Happiness Rank", ylab = "Trust (Government Corruption)", main = "Happiness rank based on Trust")
+```
+### We have looked at the scatter plots and conclude that
+
+* The more corrupt the government is, the lower the values of happiness. 
+* There is no such pattern for the Happiness Rank's generosity.
+
+## Now lets check the correlation among the attributes
+
+## 2015
+```{r}
+my_data15 <- X2015[,c(3,4,5,6,7,8,9,10,11,12)]
+res15 <- cor(my_data15)
+
+corrplot(res15)
+```
+
+* The Highest Correlated Attributes in the 2015 Year are valued  at 0.82 with the Economy(GDP Per Capita) and Health(Life Expectancy).
+
+## 2016
+```{r}
+my_data16 <- x2016[,c(3,4,5,6,7,8,9,10,11,12)]
+res16 <- cor(my_data16)
+res16
+corrplot(res16)
+```
+
+## 2017
+```{r}
+my_data17 <- X2017[,c(2,3,4,5,6,7,8,9,10,11,12)]
+res17 <- cor(my_data17)
+res17
+corrplot(res17)
+```
+
+-  We looked at the correlation of individual data points, but we've got columns like Whisker High / Low, Upper / Lower Confidence Rate and many more in 2016 and 2017. That's why we create chaos by combining them. So we're going to take up either one by one or just one set of data.
+
+We've been trying to look at the trends, but we can't mark the countries because there are 158 specific country values! To view for all, we have to get a way, or we can even identify categories for such cases.
+
+#### All data sets have been filtered and new data sets have been form containing only two attributes "country" and "Happiness Score" in order to compare the countries' scores over 3 year period.
+
+```{r}
+A <- tbl_df(X2015) 
+B <- tbl_df(x2016)
+C <- tbl_df(X2017)
+Happiness_scoreA <- A$`Happiness Score`
+Happiness_scoreB <- B$`Happiness Score`
+Happiness_scoreC <- C$Happiness.Score
+Happiness_7A1 <- filter(A, Happiness_scoreA > 7)
+Happiness_7B1 <- filter(B, Happiness_scoreB > 7)
+Happiness_7C1 <- filter(C, Happiness_scoreC > 7)
+Happiness_7A <- data.frame(Happiness_7A1$Country,Happiness_7A1$`Happiness Score`)
+Happiness_7B <- data.frame(Happiness_7B1$Country,Happiness_7B1$`Happiness Score`)
+Happiness_7C <- data.frame(Happiness_7C1$Country,Happiness_7C1$Happiness.Score)
+Happiness_7A
+Happiness_7B
+Happiness_7C
+```
+
+### Plotting countries with Happiness score more than 7
+
+```{r}
+## 2015
+ggplot(data = Happiness_7A, aes(x =Happiness_7A$Happiness_7A1.Country , y= Happiness_7A$Happiness_7A1..Happiness.Score.)) +   geom_bar(stat="identity", fill="steelblue")+
+  theme_minimal()
+## 2016
+ggplot(data = Happiness_7B, aes(x =Happiness_7B$Happiness_7B1.Country , y= Happiness_7B$Happiness_7B1..Happiness.Score.)) +   geom_bar(stat="identity", fill="steelblue")+
+  theme_minimal()
+## 2017
+ggplot(data = Happiness_7C, aes(x =Happiness_7C$Happiness_7C1.Country , y= Happiness_7C$Happiness_7C1.Happiness.Score)) +   geom_bar(stat="identity", fill="steelblue")+
+  theme_minimal()
+``` 
+### We have looked at the countries with Happiness Score more than 7 and we can say that Switzerland / Denmark / Norway were the happiest countries with more than 7.5 score. While The countries like the U.S./Austria / Finland have shown an increase in their happiness ranking. 
+---
+
+### Now the other problem statement is to check the correlation between happiness and other factors like Health and Economy (GDP). And perform hypothesis Testing.
+
+### DataCleaning and combining all three 3 year dataset into one.
+
+```{r}
+X2015$year <- 2015
+x2016$year <- 2016
+X2017$year <- 2017
+names(X2017)[2] <- "Happiness Rank"
+names(X2017)[3] <- "Happiness Score"
+names(X2017)[6] <- "Economy (GDP per Capita)"
+names(X2017)[8] <- "Health (Life Expectancy)"
+names(X2017)[11] <- "Trust (Government Corruption)"
+names(X2017)[12] <- "Dystopia Residual"
+x15_17 <- rbind.fill(X2015,x2016,X2017)
+x15_17
+names(x15_17)[5] <- "SD_error"
+x15_17
+x15_17 <-  x15_17 %>% dplyr::select(Country:year,-Region, -SD_error)
+x15_17
+names(x15_17) <- c("Country","Happiness_Rank","Happiness_Score","Economy_GDP","Family","Health","Freedom","Trust","Generosity","Dystopia_Residual","year")
+x15_17
+
+```
+
+
+### DATA COMPONENTS of new dataset
+```{r}
+names(x15_17)
+head(x15_17)
+str(x15_17)
+summary(x15_17)
+```
+
+### Inspect all NA values 
+```{r}
+colSums(is.na.data.frame(x15_17))
+```
+
+
+```{r}
+countries.didnt.appear.3years <- x15_17 %>% group_by(Country) %>% mutate(count = sum(year))
+countries.didnt.appear.3years %>% filter(count != 6048) %>% dplyr::select(Country, Happiness_Rank, year) %>% arrange(Country)
+```
+
+# Analysis
+#### * Correlation
+#### * Hypotesis Testing
+
+##### Correlation check No.1
+
+```{r}
+corrplot(cor(x15_17 %>% dplyr::
+               select(Happiness_Score:Dystopia_Residual)), 
+         method="color",  
+         sig.level = 0.01, insig = "blank",
+         addCoef.col = "black", 
+         tl.srt=45, 
+         type="upper"
+         )
+```
+
+*The graph of correlation reveals that the economic GDP rating appears to have the greatest impact on the happiness score, and the second biggest impact is the health score.
+
+# Hypothesis Testing
+
+*We are using t statistic to determine whether there is direct positive relationship between happiness and Economy (GDP)
+
+```{r}
+HM <- lm(x15_17$Happiness_Score ~ x15_17$Economy_GDP, data = x15_17)
+HM %>% summary()
+```
+ 
+### Calculate t-statistics
+$$H_0 : α = 0 $$
+$$H_a : α \ne 0 $$
+* Using t-statistics, t= 42.44, p< 0.001.
+* There was statistical significance evidence of constant not being 0.
+ And below we calculate the 95% CI for α by using confint() function.
+```{r}
+HM %>% confint()
+```
+ 
+* Therefore, 95% CI for α is [3.220554]
+* Hence, we rejct H0: α = 0.
+ 
+## Model Parameters (β)
+The slope of the regression line was reported as β =2.15. This means that One Unit increase in GDP is related to an average increase in happiness score by 2.18 units. Stating positive change.
+The slope is tested using a t statistic, reported as t = 27.45, p<0.001.
+
+*There was statistically siginificant evidence that the β is not 0.
+
+*The confint() function used above shows the 95% CI for slope to be [1.995 2.30].
+
+*95% CI does not capture H0, so it is rejected.
+
+*There is a statistically significant positive relationship between GDP and hapiness score of a country.
+
+
+
+
+$$H_0 : β = 0 $$
+ 
+$$H_0 : β \ne 0 $$
+
+
+# Histogram of the World Happiness Scores from years 2015 to 2017
+
+
+```{r}
+
+hist(x15_17$Happiness_Score , xlab = "World Happiness Score from 2015 to 2017", main = "World Happiness Score from 2015 to 2017")
+```
+
+### Ranking
+```{r}
+p <- ggplot(x15_17 %>% filter(year==2017), aes(x= Happiness_Score,y= 
+                                             reorder(Country,Happiness_Score))) + 
+  geom_point(colour = "red", alpha = .5) + 
+  geom_segment(aes(yend=reorder(Country, Happiness_Score)), xend = 0, colour="pink", alpha = .5) + 
+  theme(axis.text.y = element_text(angle = 45, hjust = 1)) + 
+  labs(title = "World Hapiness Rnak in 2017", y = "Country Name", x = "Hapiness Score")
+ggplotly(p)
+```
+
+# Scatter Plot
+
+
+#### Scatter Plot No.1
+```{r}
+plot(Happiness_Score ~ Economy_GDP, data = x15_17)
+```
+
+### Scatter Plot No.2
+Showing realtionship between Happiness score and GDP
+```{r}
+plot_ly(data = x15_17 %>% filter(year == 2017), 
+        x=~Economy_GDP, y=~Happiness_Score, type = "scatter",
+        text = ~paste("Country:", Country)) %>% 
+  layout(title = "Happiness and GDP relationship", 
+         xaxis = list(title = "GDP per Capita"),
+         yaxis = list(title = "Hapiness Score"))
+```
+
+### Scatter Plot No.3
+showing the relations between happiness score, GDP and Health
+
+```{r}
+plot_ly(data = x15_17, 
+        x=~Economy_GDP, y=~Happiness_Score, color=~Health, type = "scatter",
+        text = ~paste("Country:", Country)) %>% 
+        layout(title = "Happiness, GDP and Health relationship", 
+               xaxis = list(title = "GDP per Capita"),
+               yaxis = list(title = "Hapiness Score"))
+```
+
+
+This interactive scatterplot reveals that there is a strong positive correlation between GDP and Happiness. Also points are coloured by the Health score, which also means that Health appears to have great impact on happiness.
+
+
+# Boxplot showing the relation between region and Happiness Score
+
+### Happiness score by region(boxplot)
+```{r}
+names(x2016)[4] <- "Happiness_Score"
+ggplot(x2016, aes(x=Region, y= Happiness_Score, colour = Region)) + 
+  geom_boxplot() + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  labs(title = "Happiness Score Boxplot",
+       x = "Region",
+       y = "Happiness Score")
+```
+
+
+## Extract & Compare Top5, Middle5 and Worst5 Countries
+
+```{r}
+world.happiness17 <- x15_17 %>% filter(year == 2017)
+top5 <- world.happiness17 %>% head(5) %>% mutate(Level = "TOP5Countries")
+middle5 <- world.happiness17[76:80, ] %>% mutate(Level = "MIDDLE5Countries")
+worst5 <- world.happiness17 %>% tail(5) %>% mutate(Level = "WORST5Countries")
+caomparison <- bind_rows(top5, middle5, worst5)
+caomparison$Level <- as.factor(caomparison$Level)
+caomparison <- transform(caomparison, Level = factor(Level, levels = c("TOP5Countries", "MIDDLE5Countries", "WORST5Countries" )))
+ggplot(caomparison, aes(x = Level, y = Family, fill = Level)) + geom_boxplot()
+```
+
+
+Analysis of the six different key conditions used to determine overall state of happiness of a country. Looking at the top five, middle five and bottom five countries of the dataset.
+
+```{r}
+datatable(caomparison,
+          options = list(
+            lengthMenu = c(5, 10, 15)
+          ),
+          caption = 
+            htmltools::tags$caption(
+              style = 'caption-side: bottom; text-align: center;', 
+              htmltools::em('Data table that only includes top5, middle5 and worst5 countries'))
+          )
+```
+
+```{R}
+caomparison.score <- caomparison %>% gather(key = "columns", value = "score", Happiness_Score:Dystopia_Residual)
+caomparison.score %>% 
+  ggplot(aes(x = Level, y = score, colour = Level, fill = Level)) + 
+  geom_boxplot(position=position_dodge(width=1)) + facet_wrap(~columns, scales = "free")
+```
+
+
+
+# Discussion
+
+
+* By analyzing data from Global Happiness Levels in the world created by the United Nations Sustainable Development Solutions Network, we are able to discover the effect of each of the different factors in determining "happiness." We also found that, among the various factors, Economic GDP appears to have the most effect on  happiness and the next most effective is Health. We then decided to focus on these two by establishing graphs of their relationships to discover that there is a direct relation between these two factors. 
+
+* In addition to these details, in order to get a better understanding of similarities and differences, we decided to explore the subject more closely by classifying those countries in the data to the top, middle and bottom five countries according to ranked scores. And it determined that Europe, particularly Scandinavia and Switzerland, had the "happiest" countries.
+* Furthermore, in Africa and the Middle East, the "least happy" countries were located. This suggests that countries close to each other or those in the same region often have similar living conditions and are therefore similarly affected by factors.
+
+* One major concern is how Trust looked at the lowest scores of all conditions. Countries that have little or no faith or trust in governments make it so that citizens feel disempowered and unable to make their life choices, which is demonstrated in the connection between low confidence and low freedom ratings.
+
+* We can discern what makes countries and their people happy by looking and reviewing these reports, enabling us to concentrate on prioritizing and enhancing these aspects of each country. This is how we can fulfill the genuine pursuit of happiness that we as human beings aim for.
+
+# References
+
+- World Happiness Analysis - A Simple Approach | Kaggle. 2019. World Happiness Analysis - A Simple Approach | Kaggle. (https://kaggle.com/anilcanblt/world-happiness-analysis-a-simple-approach)
